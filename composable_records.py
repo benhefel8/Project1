@@ -10,7 +10,7 @@ class Record(SimpleNamespace):
 
     def __repr__(self):
         ns_repr = super().__repr__()
-        return ns_repr.replace('namespace', 'record')
+        return ns_repr.replace('namespace', 'record').replace(', ', ',\n ')
 
     def __getitem__(self, key):
         return self.__dict__[key]
@@ -224,9 +224,11 @@ def heads(n, record):
                  - Any list/tuple value replaced with the head.
                  - All other value left unchanged.
     """
-    out = {k: val[:n] if isinstance(val, list) or isinstance(val, tuple) else val
+    out = {k: (val[:n]  if isinstance(val, list) or isinstance(val, tuple) else val)
             for k, val in record.items()}
     return _maybe_return_record(record, out)
+
+
 
 
 @pipeable
@@ -245,4 +247,13 @@ def group_by(group_by, recs, *, default = None):
         out = acc | {(lbl := toolz_get(group, rec, default)): toolz_get(lbl, acc) + [rec] if lbl in acc else [rec]}
         return out
     return base_reduce(update(group_by), recs, {})
-        
+
+@pipeable
+def readable_output(record, *, num_keys = 3, max_len_seq = 3):
+    """ Make a more more readable output for a record by trimming the contents to specified limits.
+    """
+    keys = list(record.keys())[:num_keys]
+    return (record
+            >> subset(keys)
+            >> heads(max_len_seq)
+           )

@@ -111,5 +111,17 @@ def with_open(body_func,
              ) as f:
         return body_func(f)
     
-    
+
+@pipeable
+def apply(func, value):
+    """ Apply a function to a value, possibly by piping with `>>`
+
+    Args.
+        - func: The single-argument function to be applied.  This function need not be 
+                pipeable.
+        - value: The input argument
+
+    Returns: The result of `func(value)`
+    """
+    return func(value)
     
